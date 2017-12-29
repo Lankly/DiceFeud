@@ -102,29 +102,30 @@ int Display::blinkUntilKeypress(std::vector<Tile::coord_t> coordinates) const
   bool blink_on = true;
   int ch = ERR;
 
-  int blink_ch = '?';
-  int orig_ch = '?';
+  // User can't select anything, just hit enter for them
+  if (coordinates.size() < 1) { return '\n'; }
+
+  // Find any space in the given coordinates (all should be exactly the same)
+  size_t x, y;
+  decodeCoordinate(coordinates[0], x, y);
+
+  // Mark what it originally looked like before we started blinking
+  int orig_ch = mvinch(y, x);
+  int blink_ch =
+    COLOR_PAIR(static_cast<int>(ColorPair::WHITE_BLACK))
+    | (static_cast<char>(orig_ch));
 
   // This loop will happen every half second
-  while ((ch = getch()) == ERR) {
-    for (size_t coord : coordinates)
-    {
-      size_t x, y;
-      decodeCoordinate(coord, x, y);
-
-      if (orig_ch == '?') {
-        orig_ch = mvinch(y, x);
-        blink_ch =
-          COLOR_PAIR(static_cast<int>(ColorPair::WHITE_BLACK))
-          | (static_cast<char>(orig_ch));
-      }
-
-      mvaddch(y, x, blink_on ? blink_ch : orig_ch);
-    }
+  do
+  {
+    drawValue(coordinates, blink_on ? blink_ch : orig_ch);
 
     // flip state
     blink_on = !blink_on;
-  }
+  } while ((ch = getch()) == ERR);
+
+  // Make sure we restore what it originally looked like
+  drawValue(coordinates, orig_ch);
 
   return ch;
 }
