@@ -27,6 +27,9 @@ Board::tile_iterator make_selection(
 
 bool Human::takeTurn(std::mt19937&rng, Display& d, Board& b)
 {
+  // Refresh board
+  b.draw();
+
   // Get possible attacking tiles
   std::list<Board::tile_iterator> my_tiles =
     b.filterForFrontlineTiles(b.getTilesByColor(getColor()));

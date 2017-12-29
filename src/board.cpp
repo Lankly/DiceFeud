@@ -338,6 +338,9 @@ void Board::fight(std::mt19937& rng, size_t attacker_id, size_t defender_id)
 
   // In all cases, attacker's tile gets reduced to 1.
   attacker.setNumDice(1);
+
+  // Show updated tiles
+  draw();
 }
 
 
