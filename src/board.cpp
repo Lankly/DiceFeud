@@ -326,6 +326,7 @@ void Board::fight(std::mt19937& rng, size_t attacker_id, size_t defender_id)
   status << "          " << defender_total << " < Defender";
   d_.printMessage(status.str());
   std::this_thread::sleep_for(std::chrono::milliseconds(500));
+  d_.clearMessageBar();
 
 
   // Attacker won
@@ -333,8 +334,6 @@ void Board::fight(std::mt19937& rng, size_t attacker_id, size_t defender_id)
     defender.setNumDice(attacker_dice - 1);
     defender.setColor(attacker.getColor());
   }
-
-  d_.clearMessageBar();
 
   // In all cases, attacker's tile gets reduced to 1.
   attacker.setNumDice(1);
@@ -438,6 +437,34 @@ std::list<Board::tile_iterator> Board::filterForFrontlineTiles(
   }
 
   // Delete the non-frontlines from the passed-in tiles.
+  for(std::list<Board::tile_iterator>::iterator cur : to_erase)
+  {
+    tiles.erase(cur);
+  }
+
+  return tiles;
+}
+
+
+std::list<Board::tile_iterator> Board::filterForMultipleDice(
+  std::list<Board::tile_iterator> tiles)
+{
+  // This will be used to keep track of tiles we're going to remove from tiles.
+  std::list<std::list<Board::tile_iterator>::iterator> to_erase;
+
+  for (std::list<Board::tile_iterator>::iterator cur = std::begin(tiles)
+    ; cur != std::end(tiles)
+    ; ++cur)
+  {
+    std::list<Board::tile_iterator> adjacent = getAdjacentTiles(**cur);
+
+    // Does not have multiple dice
+    if ((**cur).getNumDice() < 2) {
+      to_erase.push_back(cur);
+    }
+  }
+
+  // Delete the tiles with only one die from the passed-in tiles.
   for(std::list<Board::tile_iterator>::iterator cur : to_erase)
   {
     tiles.erase(cur);

@@ -1,5 +1,6 @@
 #include <stdexcept>
 #include <list>
+#include <sstream>
 #include "human.h"
 #include "../board.h"
 #include "../display.h"
@@ -18,6 +19,7 @@
  */
 Board::tile_iterator make_selection(
   Display& d
+  , Board& b
   , std::list<Board::tile_iterator>& options);
 
 
@@ -27,21 +29,22 @@ Board::tile_iterator make_selection(
 
 bool Human::takeTurn(std::mt19937&rng, Display& d, Board& b)
 {
-  // Refresh board
-  b.draw();
-
   // Get possible attacking tiles
   std::list<Board::tile_iterator> my_tiles =
     b.filterForFrontlineTiles(b.getTilesByColor(getColor()));
 
   // Player has lost the game.
-  if (my_tiles.size() == 0) {
-    return false;
-  }
+  if (my_tiles.size() == 0) { return false; }
+
+  my_tiles = b.filterForMultipleDice(my_tiles);
+
+  // Player cannot take turn.
+  if (my_tiles.size() == 0) { return true; }
+
 
   // Select attacking tile
   d.printMessage("Select your tile.");
-  Board::tile_iterator cur_selection = make_selection(d, my_tiles);
+  Board::tile_iterator cur_selection = make_selection(d, b, my_tiles);
 
   // Get possible defending tiles
   d.printMessage("Select enemy tile.");
@@ -51,7 +54,7 @@ bool Human::takeTurn(std::mt19937&rng, Display& d, Board& b)
       , b.getAdjacentTiles(*cur_selection));
 
   // Select defending tile
-  Board::tile_iterator enemy_selection = make_selection(d, enemy_tiles);
+  Board::tile_iterator enemy_selection = make_selection(d, b, enemy_tiles);
 
   d.clearMessageBar();
 
@@ -68,6 +71,7 @@ bool Human::takeTurn(std::mt19937&rng, Display& d, Board& b)
 
 Board::tile_iterator make_selection(
   Display& d
+  , Board& b
   , std::list<Board::tile_iterator>& options)
 {
   if (options.size() < 1) {
@@ -83,6 +87,9 @@ Board::tile_iterator make_selection(
   while (input != static_cast<int> ('\n'))
   {
     input = d.blinkUntilKeypress((**cur_selection).getCoordinates());
+
+    // Used in some debug commands
+    std::ostringstream debug;
 
     // Process non-enter input
     switch (input)
@@ -110,6 +117,43 @@ Board::tile_iterator make_selection(
           ++cur_selection;
         }
         break;
+
+        /* Debug commands */
+
+      case '#':
+        d.clearMessageBar();
+        debug << "Num dice on tile: " << (**cur_selection).getNumDice();
+        d.printMessage(debug.str());
+        break;
+
+      case '$':
+        d.clearMessageBar();
+        debug << "Num tiles with color: "
+          << b.getTilesByColor((**cur_selection).getColor()).size();
+        d.printMessage(debug.str());
+        break;
+
+      case '=':
+        b.draw();
+        d.clearMessageBar();
+        break;
+
+      case '@':
+        d.clearMessageBar();
+        debug << "Color ID: "
+          << static_cast<size_t> ((**cur_selection).getColor());
+        d.printMessage(debug.str());
+        break;
+
+      case '*':
+        std::list<Board::tile_iterator> all_tiles;
+        for (Board::tile_iterator tile = b.getTiles()
+          ; tile != b.getTilesEnd()
+          ; ++tile)
+        {
+          all_tiles.push_back(tile);
+        }
+        return make_selection(d, b, all_tiles);
     }
   }
 

@@ -118,6 +118,15 @@ class Board
     std::list<tile_iterator> filterForFrontlineTiles(
       std::list<tile_iterator> tiles);
 
+    /**
+     * Removes tiles that only have one die.
+     *
+     * @param {std::vector<tile_iterator>&} tiles The tiles to filter.
+     * @returns {std::vector<tile_iterator>} The filtered tiles.
+     */
+    std::list<tile_iterator> filterForMultipleDice(
+      std::list<tile_iterator> tiles);
+
 
   private:
 
