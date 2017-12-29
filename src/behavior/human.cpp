@@ -37,9 +37,11 @@ bool Human::takeTurn(std::mt19937&rng, Display& d, Board& b)
   }
 
   // Select attacking tile
+  d.printMessage("Select your tile.");
   Board::tile_iterator cur_selection = make_selection(d, my_tiles);
 
   // Get possible defending tiles
+  d.printMessage("Select enemy tile.");
   std::list<Board::tile_iterator> enemy_tiles =
     Board::filterColoredTiles(
       (*cur_selection).getColor()
@@ -47,6 +49,8 @@ bool Human::takeTurn(std::mt19937&rng, Display& d, Board& b)
 
   // Select defending tile
   Board::tile_iterator enemy_selection = make_selection(d, enemy_tiles);
+
+  d.clearMessageBar();
 
   // Fight
   b.fight(rng, (*cur_selection).getId(), (*enemy_selection).getId());

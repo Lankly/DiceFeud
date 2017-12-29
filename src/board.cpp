@@ -1,11 +1,22 @@
 #include <cmath>
+#include <chrono>
 #include <float.h>
 #include <random>
+#include <sstream>
 #include <stdexcept>
 #include <string>
+#include <thread>
 #include "board.h"
 #include "display.h"
 #include "tile.h"
+
+/*********************
+ * STATIC PROPERTIES *
+ *********************/
+
+size_t Board::MINIMUM_WIDTH = 10
+  , Board::MINIMUM_HEIGHT = 10;
+
 
 /******************************
  * HELPER FUNCTION PROTOTYPES *
@@ -48,7 +59,7 @@ Board::Board(
     throw std::invalid_argument("Board cannot have no size.");
   }
 
-  if (width < Display::MINIMUM_WIDTH || height < Display::MINIMUM_HEIGHT) {
+  if (width < Board::MINIMUM_WIDTH || height < Board::MINIMUM_HEIGHT) {
     throw std::invalid_argument("Board dimensions cannot be below minimums.");
   }
 
@@ -295,18 +306,35 @@ void Board::fight(std::mt19937& rng, size_t attacker_id, size_t defender_id)
   size_t defender_dice = defender.getNumDice();
   size_t attacker_total = 0, defender_total = 0;
 
+  std::ostringstream status;
+
+
+  // Get attacker total, print
   for (size_t i = 0; i < attacker_dice; ++i) {
     attacker_total += (rng() % 6) + 1;
   }
+  status << "Attacker > " << attacker_total;
+  d_.printMessage(status.str());
+  std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+
+  // Get defender total, print
   for (size_t i = 0; i < defender_dice; ++i) {
     defender_total += (rng() % 6) + 1;
   }
+  // pad status with 10 spaces
+  status << "          " << defender_total << " < Defender";
+  d_.printMessage(status.str());
+  std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
 
   // Attacker won
   if (attacker_total > defender_total) {
     defender.setNumDice(attacker_dice - 1);
     defender.setColor(attacker.getColor());
   }
+
+  d_.clearMessageBar();
 
   // In all cases, attacker's tile gets reduced to 1.
   attacker.setNumDice(1);

@@ -2,6 +2,7 @@
 #define DISPLAY_H
 
 #include <ncurses.h>
+#include <string>
 #include <vector>
 #include "color.h"
 #include "tile.h"
@@ -35,6 +36,22 @@ class Display
     int blinkUntilKeypress(std::vector<Tile::coord_t> coordinates) const;
 
     /**
+     * Removes any message currently in the message bar.
+     */
+    void clearMessageBar();
+
+    /**
+     * Turns an index into an array into an index into a matrix, where the width
+     * of that matrix is the known game_width. Additionally, centers it on the
+     * screen according to the known game dimensions.
+     *
+     * @param {size_t} coord The coordinate to decode.
+     * @param {size_t&} x Where the result's x-value is stored.
+     * @param {size_t&} y Where the result's y-value is stored.
+     */
+    void decodeCoordinate(size_t coord, size_t& x, size_t& y) const;
+
+    /**
      * Draws the same character to the screen at every coordinate given.
      *
      * @param {std::vector<size_t>} coordinates The coordinates to draw the
@@ -56,15 +73,12 @@ class Display
     static int getDisplayableCharacter(Color c, char d);
 
     /**
-     * Turns an index into an array into an index into a matrix, where the width
-     * of that matrix is the known game_width. Additionally, centers it on the
-     * screen according to the known game dimensions.
+     * Prints a message below the game board.
      *
-     * @param {size_t} coord The coordinate to decode.
-     * @param {size_t&} x Where the result's x-value is stored.
-     * @param {size_t&} y Where the result's y-value is stored.
+     * @param {std::string|const char *} msg The message to print.
      */
-    void decodeCoordinate(size_t coord, size_t& x, size_t& y) const;
+    void printMessage(std::string msg);
+    void printMessage(const char* msg);
 
 
     /**************

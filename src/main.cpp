@@ -8,7 +8,7 @@ int main(int argc, char** argv)
   std::mt19937 rng(randomDevice());
 
   const size_t NUM_PLAYERS = 8;
-  Display d (80, 24);
+  Display d (80, 23);
 
   try
   {

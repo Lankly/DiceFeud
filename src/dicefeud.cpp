@@ -19,7 +19,7 @@
 
 DiceFeud::DiceFeud(std::mt19937& rng, Display& d, size_t numPlayers)
   : d_(d)
-  , board_(rng, d, Display::MINIMUM_WIDTH, Display::MINIMUM_HEIGHT)
+  , board_(rng, d, Display::MINIMUM_WIDTH, Display::MINIMUM_HEIGHT - 1)
 {
   if (numPlayers < 2) {
     std::invalid_argument("There must be at least 2 players.");

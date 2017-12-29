@@ -1,5 +1,6 @@
 #include <ncurses.h>
 #include <stdexcept>
+#include <string>
 #include "display.h"
 #include "color.h"
 #include "tile.h"
@@ -131,6 +132,33 @@ int Display::blinkUntilKeypress(std::vector<Tile::coord_t> coordinates) const
 }
 
 
+void Display::clearMessageBar()
+{
+  size_t y = known_terminal_height / 2;
+  y += game_height / 2 + 1;
+
+  move(y, 0);
+  for (size_t i = 0; i < known_terminal_width; ++i)
+  {
+    addch(' ');
+  }
+}
+
+
+void Display::decodeCoordinate(size_t coord, size_t& x, size_t& y) const
+{
+  x = coord % game_width;
+  y = coord / game_width;
+
+  // Now center them
+  size_t center_x = known_terminal_width / 2;
+  size_t center_y = known_terminal_height / 2;
+
+  x += center_x - (game_width / 2);
+  y += center_y - (game_height / 2);
+}
+
+
 void Display::drawValue(
   std::vector<Tile::coord_t>& coordinates
   , int character)
@@ -166,17 +194,24 @@ int Display::getDisplayableCharacter(Color c, char d)
 }
 
 
-void Display::decodeCoordinate(size_t coord, size_t& x, size_t& y) const
+void Display::printMessage(std::string msg)
 {
-  x = coord % game_width;
-  y = coord / game_width;
+  size_t msg_len = msg.length();
 
-  // Now center them
   size_t center_x = known_terminal_width / 2;
   size_t center_y = known_terminal_height / 2;
 
-  x += center_x - (game_width / 2);
-  y += center_y - (game_height / 2);
+  center_x -= msg_len / 2;
+  center_y += game_height / 2 + 1;
+
+  mvaddstr(center_y, center_x, msg.c_str());
+  refresh();
+}
+
+void Display::printMessage(const char* msg)
+{
+  std::string str_msg (msg);
+  printMessage(str_msg);
 }
 
 

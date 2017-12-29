@@ -160,6 +160,10 @@ class Board
     std::list<Tile> tiles_;
     std::vector<bool> adjacency_;
 
+    /* GLOBALS */
+
+    static size_t MINIMUM_WIDTH, MINIMUM_HEIGHT;
+
 };
 
 #endif
